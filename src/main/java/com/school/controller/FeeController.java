@@ -27,6 +27,9 @@ public class FeeController {
     private StudentFeeRepository studentFeeRepository;
 
     @Autowired
+    private FeeStructureRepository feeStructureRepository;
+
+    @Autowired
     private StudentRepository studentRepository;
     
     @Autowired
@@ -38,6 +41,24 @@ public class FeeController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createFeeHead(@RequestBody FeeHead feeHead) {
         return ResponseEntity.ok(feeHeadRepository.save(feeHead));
+    }
+
+    @GetMapping("/admin/fees/heads")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<FeeHead>> getAllFeeHeads() {
+        return ResponseEntity.ok(feeHeadRepository.findAll());
+    }
+
+    @GetMapping("/admin/fees/structure")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<FeeStructure>> getAllFeeStructures() {
+        return ResponseEntity.ok(feeStructureRepository.findAll());
+    }
+
+    @GetMapping("/admin/fees/status/class/{classId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<StudentFee>> getFeesByClass(@PathVariable Long classId) {
+        return ResponseEntity.ok(studentFeeRepository.findByStudentSchoolClassId(classId));
     }
 
     @PostMapping("/admin/fees/structure")

@@ -21,7 +21,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
  */
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
 public class AdminController {
 
     @Autowired
@@ -60,6 +60,7 @@ public class AdminController {
      * @return The saved SchoolClass entity.
      */
     @PostMapping("/classes")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createClass(@RequestBody SchoolClass schoolClass) {
         return ResponseEntity.ok(classRepository.save(schoolClass));
     }
@@ -84,10 +85,16 @@ public class AdminController {
      * @return The saved Section entity linked to the class.
      */
     @PostMapping("/classes/{classId}/sections")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> addSection(@PathVariable Long classId, @RequestBody Section section) {
         SchoolClass schoolClass = classRepository.findById(classId).orElseThrow();
         section.setSchoolClass(schoolClass);
         return ResponseEntity.ok(sectionRepository.save(section));
+    }
+
+    @GetMapping("/sections")
+    public List<Section> getAllSections() {
+        return sectionRepository.findAll();
     }
 
     // --- Subjects ---
@@ -99,11 +106,27 @@ public class AdminController {
      * @return The saved Subject entity.
      */
     @PostMapping("/subjects")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createSubject(@RequestBody Subject subject) {
         return ResponseEntity.ok(subjectRepository.save(subject));
     }
+
+    @GetMapping("/subjects")
+    public List<Subject> getAllSubjects() {
+        return subjectRepository.findAll();
+    }
     
     // --- Students ---
+
+    @GetMapping("/students")
+    public List<Student> getAllStudents() {
+        return studentRepository.findAll();
+    }
+
+    @GetMapping("/students/class/{classId}/section/{sectionId}")
+    public List<Student> getStudentsByClassAndSection(@PathVariable Long classId, @PathVariable Long sectionId) {
+        return studentRepository.findBySchoolClassIdAndSectionId(classId, sectionId);
+    }
 
     /**
      * Registers a new Student in the system.
@@ -115,6 +138,7 @@ public class AdminController {
      * @return The saved Student entity.
      */
     @PostMapping("/students")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createStudent(@jakarta.validation.Valid @RequestBody StudentDto dto) {
         // 1. Create User
         User user = new User();
@@ -180,16 +204,33 @@ public class AdminController {
         return ResponseEntity.ok(teacherRepository.save(teacher));
     }
 
+    @GetMapping("/teachers")
+    public List<Teacher> getAllTeachers() {
+        return teacherRepository.findAll();
+    }
+
     // --- Exams ---
 
     @PostMapping("/exams")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createExam(@RequestBody Exam exam) {
         return ResponseEntity.ok(examRepository.save(exam));
     }
 
+    @GetMapping("/exams")
+    public List<Exam> getAllExams() {
+        return examRepository.findAll();
+    }
+
     @PostMapping("/exam-schedules")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createExamSchedule(@RequestBody ExamSchedule schedule) {
         // Simple implementation: Ensure Exam/Class/Subject objects are provided or handle lookup
         return ResponseEntity.ok(examScheduleRepository.save(schedule));
+    }
+
+    @GetMapping("/exam-schedules")
+    public List<ExamSchedule> getAllExamSchedules() {
+        return examScheduleRepository.findAll();
     }
 }

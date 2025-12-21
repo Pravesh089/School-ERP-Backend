@@ -34,7 +34,10 @@ public class StudentController {
     private MarksRepository marksRepository;
 
     @Autowired
-    private ExamScheduleRepository examScheduleRepository; // Needed if we want to show exam details with marks, but marks are linked to schedule. 
+    private ExamScheduleRepository examScheduleRepository;
+
+    @Autowired
+    private com.school.service.TimetableService timetableService;
     // Actually Marks entity has ExamSchedule, so we can fetch Marks and it will contain the schedule info? 
     // Yes, if we didn't use DTOs that hide it. But we should probably return a DTO or the entity (ignoring recursion).
     // Let's stick to Entities for MVP simplicity, relying on Jackson to handle serialization (careful with recursion).
@@ -78,7 +81,15 @@ public class StudentController {
     @GetMapping("/marks")
     public ResponseEntity<List<Marks>> getMyMarks() {
         Student student = getLoggedStudent();
-        // Similarly, need findByStudentId in MarksRepository.
         return ResponseEntity.ok(marksRepository.findByStudentId(student.getId()));
+    }
+
+    @GetMapping("/timetable")
+    public ResponseEntity<List<TimetableSlot>> getMyTimetable() {
+        Student student = getLoggedStudent();
+        return ResponseEntity.ok(timetableService.getClassTimetable(
+            student.getSchoolClass().getId(), 
+            student.getSection().getId()
+        ));
     }
 }
