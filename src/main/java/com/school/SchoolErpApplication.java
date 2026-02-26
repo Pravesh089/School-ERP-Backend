@@ -11,6 +11,7 @@ public class SchoolErpApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(SchoolErpApplication.class, args);
+		// implement feature 1234
 	}
 
 }
